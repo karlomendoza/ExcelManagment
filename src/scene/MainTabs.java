@@ -1,16 +1,12 @@
 package scene;
 
 import javafx.application.Application;
-import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -18,7 +14,7 @@ import javafx.stage.Stage;
  *
  * @web http://java-buddy.blogspot.com/
  */
-public class JavaFX_uiTabPane extends Application {
+public class MainTabs extends Application {
 
 	/**
 	 * @param args
@@ -30,10 +26,9 @@ public class JavaFX_uiTabPane extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
-		primaryStage.setTitle("http://java-buddy.blogspot.com/");
+		primaryStage.setTitle("Kalypso Agile Rapid Loader Optimizer");
 		Group root = new Group();
-		Scene scene = new Scene(root, 400, 300, Color.WHITE);
-
+		Scene scene = new Scene(root, 800, 700, Color.WHITE);
 		TabPane tabPane = new TabPane();
 		BorderPane mainPane = new BorderPane();
 
@@ -42,48 +37,36 @@ public class JavaFX_uiTabPane extends Application {
 		tabA.setText("SubClass Transformation");
 		// Add something in Tab
 
-		Main main = new Main();
-		StackPane pane = main.load(primaryStage);
-
-		tabA.setContent(pane);
+		MainSubClassTransformation mainSCT = new MainSubClassTransformation();
+		StackPane mainSubClassTransformationPane = mainSCT.load(primaryStage);
+		tabA.setContent(mainSubClassTransformationPane);
 
 		tabPane.getTabs().add(tabA);
 
 		Tab tabB = new Tab();
 		tabB.setText("Split Tool");
 		// Add something in Tab
-		StackPane tabB_stack = new StackPane();
-		tabB_stack.setAlignment(Pos.CENTER);
-		tabB_stack.getChildren().add(new Label("Label@Tab B"));
-		tabB.setContent(tabB_stack);
+		MainSubClassSeparator mainSCS = new MainSubClassSeparator();
+		StackPane mainSubClassSeparator = mainSCS.load(primaryStage);
+		tabB.setContent(mainSubClassSeparator);
 		tabPane.getTabs().add(tabB);
 
 		Tab tabC = new Tab();
 		tabC.setText("Validation Tool");
 		// Add something in Tab
-		VBox tabC_vBox = new VBox();
-		tabC_vBox.getChildren().addAll(new Button("Button 1@Tab C"), new Button("Button 2@Tab C"),
-				new Button("Button 3@Tab C"), new Button("Button 4@Tab C"));
-		tabC.setContent(tabC_vBox);
+
+		MainSubClassValidation mainV = new MainSubClassValidation();
+		StackPane mainSubClassValidation = mainV.load(primaryStage);
+		tabC.setContent(mainSubClassValidation);
 		tabPane.getTabs().add(tabC);
 
 		Tab tabD = new Tab();
 		tabD.setText("Batch tool");
 		// Add something in Tab
-		VBox tabD_vBox = new VBox();
-		tabD_vBox.getChildren().addAll(new Button("Button 1@Tab C"), new Button("Button 2@Tab C"),
-				new Button("Button 3@Tab C"), new Button("Button 4@Tab C"));
-		tabD.setContent(tabD_vBox);
+		Main main = new Main();
+		StackPane pane = main.load(primaryStage);
+		tabD.setContent(pane);
 		tabPane.getTabs().add(tabD);
-
-		Tab tabE = new Tab();
-		tabE.setText("One on One Transformation");
-		// Add something in Tab
-		VBox tabE_vBox = new VBox();
-		tabE_vBox.getChildren().addAll(new Button("Button 1@Tab C"), new Button("Button 2@Tab C"),
-				new Button("Button 3@Tab C"), new Button("Button 4@Tab C"));
-		tabE.setContent(tabE_vBox);
-		tabPane.getTabs().add(tabE);
 
 		mainPane.setCenter(tabPane);
 

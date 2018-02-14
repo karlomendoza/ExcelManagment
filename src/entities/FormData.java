@@ -8,7 +8,7 @@ public class FormData {
 	 * File that holds all the information, typically an excel file, only supported
 	 * xlsx and xls
 	 */
-	private File metaDataFile;
+	private File metaDataFiles;
 	/**
 	 * Directory where all the documents are.
 	 */
@@ -151,13 +151,13 @@ public class FormData {
 
 	private File transformationFile;
 
-	public FormData(File metaDataFile, File directoryWithFile, String fileExtensionColumn, String fileNameColumn,
+	public FormData(File metaDataFiles, File directoryWithFile, String fileExtensionColumn, String fileNameColumn,
 			String splitMetaDataEachRows, String objecType, String numberColumn, String revisionColumn,
 			String pathToFileFromFileVault, String importType, String descriptionColumn, boolean createIndexFile,
 			String userId, String password, String url, String workflowName, boolean createChangeOrders,
 			boolean forTesting, File resultsDirectoryFile, String subClassColumn, boolean validateAttachments,
 			String prependString, String removeFromPath) {
-		this.metaDataFile = metaDataFile;
+		this.metaDataFiles = metaDataFiles;
 		this.directoryWithFile = directoryWithFile;
 		this.fileExtensionColumn = fileExtensionColumn;
 		this.fileNameColumn = fileNameColumn;
@@ -185,41 +185,12 @@ public class FormData {
 			this.removeFromPath = Integer.valueOf(removeFromPath);
 	}
 
-	public FormData(File metaDataFile, File resultsFile, String subClassColumn, String descriptionColumn,
-			String whatever, String splitter, File transformationFile) {
-		this.metaDataFile = metaDataFile;
-		this.resultsFile = resultsFile;
-		this.subClassColumn = subClassColumn;
-		this.descriptionColumn = descriptionColumn;
-		this.whatever = whatever;
-		this.splitter = splitter;
-		this.transformationFile = transformationFile;
-
+	public File getMetaDataFiles() {
+		return metaDataFiles;
 	}
 
-	public FormData(File metaDataFile, String subClassColumn) {
-		this.metaDataFile = metaDataFile;
-		this.subClassColumn = subClassColumn;
-	}
-
-	public FormData(File metaDataFile, File directoryWithFile, String whatever) {
-		this.metaDataFile = metaDataFile;
-		this.directoryWithFile = directoryWithFile;
-		this.whatever = whatever;
-	}
-
-	// public FormData(File metaDataFile, String splitter, String whatever) {
-	// this.metaDataFile = metaDataFile;
-	// this.splitter = splitter;
-	// this.whatever = whatever;
-	// }
-
-	public File getMetaDataFile() {
-		return metaDataFile;
-	}
-
-	public void setMetaDataFile(File metaDataFile) {
-		this.metaDataFile = metaDataFile;
+	public void setMetaDataFiles(File metaDataFiles) {
+		this.metaDataFiles = metaDataFiles;
 	}
 
 	public File getDirectoryWithFile() {

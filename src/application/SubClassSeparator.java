@@ -11,14 +11,23 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import com.agile.api.APIException;
-
-import entities.FormData;
+import entities.SplitData;
 import utils.Utils;
 
 public class SubClassSeparator {
 
-	public static void processData(FormData formData) throws InvalidFormatException, IOException, APIException {
+	public static void main(String... strings) throws InvalidFormatException, IOException {
+
+		File metaDataFile = new File(
+				"C:\\Users\\Karlo Mendoza\\Excel Work\\ICU MEDICAL\\SAP DMS\\T1\\1SAPDMS_transformed_onlyData_part1 - Copy.xlsx");
+		String columnToSplitFor = "SubClass";
+		String columnToSplitFor2 = "";
+
+		SplitData formData = new SplitData(metaDataFile, columnToSplitFor, columnToSplitFor2);
+		processData(formData);
+	}
+
+	public static void processData(SplitData formData) throws InvalidFormatException, IOException {
 
 		try (Workbook wb = Utils.getWorkBook(formData.getMetaDataFile())) {
 			Sheet readSheet = wb.getSheetAt(0);
@@ -44,14 +53,15 @@ public class SubClassSeparator {
 				}
 			}
 
-			// Workbook writeBook = getWorkBook();
-
 			int subClassColumnNumber = -1;
+			int subClassColumnNumber2 = -1;
 			String lastSubClassprocessed = "";
+			String lastOtherProcessed = "";
 			Workbook writeBook = null;
 			Sheet writeSheet = null;
 			File f = null;
 
+			int i = 1;
 			for (int r = 0; r < rows; r++) {
 				row = readSheet.getRow(r);
 				if (row != null) {
@@ -63,13 +73,22 @@ public class SubClassSeparator {
 
 						subClass = cleanInput(subClass);
 
-						if (!lastSubClassprocessed.equals(subClass)) {
-							if (!lastSubClassprocessed.equalsIgnoreCase(""))
+						// String other = Utils.returnCellValueAsString(row.getCell((int)
+						// subClassColumnNumber2));
+						String other = "";
+
+						if (!lastSubClassprocessed.equals(subClass) || !lastOtherProcessed.equals(other)) {
+							if (!lastSubClassprocessed.equals(subClass))
+								i = 1;
+							if (!lastSubClassprocessed.equals(""))
 								saveExcel(writeBook, f);
 
 							lastSubClassprocessed = subClass;
-							f = new File(formData.getMetaDataFile().getParentFile() + "\\" + subClass + ".xls");
-
+							lastOtherProcessed = other;
+							f = new File(formData.getMetaDataFile().getParentFile() + "\\" + subClass + ".xlsx");
+							// f = new File(formData.getMetaDataFile().getParentFile() + "\\" + subClass + i
+							// + ".xlsx");
+							i++;
 							if (f.exists()) {
 								writeBook = Utils.getWorkBook(f);
 								writeSheet = writeBook.getSheet("data");
@@ -82,7 +101,7 @@ public class SubClassSeparator {
 						}
 
 						Row createRow2 = writeSheet.createRow((int) writeSheet.getPhysicalNumberOfRows());
-
+						// TODO regresar al utils
 						Utils.setCellsValuesToRow(createRow2, row, cols);
 
 					} else if (r == 0) {
@@ -92,9 +111,11 @@ public class SubClassSeparator {
 							if (cell != null) {
 								String valueString = Utils.returnCellValueAsString(cell);
 								// Set the number of the column
-								if (valueString.equals(formData.getSubClassColumn())) {
+								if (valueString.equals(formData.getColumnToSplitFor())) {
 									subClassColumnNumber = c;
-									break;
+								}
+								if (valueString.equals(formData.getColumnToSplitFor2())) {
+									subClassColumnNumber2 = c;
 								}
 							}
 						}
@@ -102,8 +123,9 @@ public class SubClassSeparator {
 				}
 			}
 			saveExcel(writeBook, f);
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
-
 	}
 
 	private static void saveExcel(Workbook writeBook, File f) throws FileNotFoundException, IOException {

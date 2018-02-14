@@ -14,13 +14,14 @@ import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import entities.FormData;
+import entities.ValidateData;
 import utils.Utils;
 
-public class ValidateData {
+public class DataValidator {
 
 	private static XSSFCellStyle style;
 
@@ -76,9 +77,9 @@ public class ValidateData {
 	}
 
 	@SuppressWarnings("resource")
-	public static void processData(FormData formData) throws InvalidFormatException, IOException {
+	public static void processData(ValidateData formData) throws InvalidFormatException, IOException {
 
-		Map<String, List<String>> listData = loadListData(formData.getDirectoryWithFile(), formData.getWhatever());
+		Map<String, List<String>> listData = loadListData(formData.getFileWithListValues(), formData.getSheetName());
 		Map<Integer, String> columnsToCheck = new HashMap<>();
 
 		try (XSSFWorkbook wb = new XSSFWorkbook(formData.getMetaDataFile())) {
@@ -88,10 +89,8 @@ public class ValidateData {
 
 			int rows; // No of rows
 			rows = sheet.getPhysicalNumberOfRows();
-
 			int cols = 0; // No of columns
 			int tmp = 0;
-
 			// This trick ensures that we get the data properly even if it doesn't start
 			// from first few rows
 			for (int i = 0; i < 10 || i < rows; i++) {
@@ -103,10 +102,10 @@ public class ValidateData {
 				}
 			}
 
-			XSSFWorkbook writeBook = new XSSFWorkbook();
+			SXSSFWorkbook writeBook = new SXSSFWorkbook(100);
 
-			style = writeBook.createCellStyle();
-			style.setFillForegroundColor(IndexedColors.RED.getIndex());
+			style = (XSSFCellStyle) writeBook.createCellStyle();
+			style.setFillForegroundColor((IndexedColors.RED.getIndex()));
 			style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
 			Sheet writeSheet = writeBook.createSheet("new sheet");
@@ -118,14 +117,12 @@ public class ValidateData {
 					// if it's not the header
 					if (r > 0) {
 						List<Integer> columnsWithErrorsFound = new ArrayList<>();
-						for (int c = 0; c < cols; c++) {
-							if (columnsToCheck.containsKey(c)) {
-								cell = row.getCell((int) c);
-								if (cell != null) {
-									String valueString = Utils.returnCellValueAsString(cell);
-									if (!listData.get(columnsToCheck.get(c)).contains(valueString)) {
-										columnsWithErrorsFound.add(c);
-									}
+						for (Integer column : columnsToCheck.keySet()) {
+							cell = row.getCell((int) column);
+							if (cell != null) {
+								String valueString = Utils.returnCellValueAsString(cell);
+								if (!listData.get(columnsToCheck.get(column)).contains(valueString)) {
+									columnsWithErrorsFound.add(column);
 								}
 							}
 						}
@@ -155,7 +152,7 @@ public class ValidateData {
 			}
 
 			try (FileOutputStream outputStream = new FileOutputStream(
-					formData.getMetaDataFile().getParentFile() + "\\results.xls")) {
+					formData.getMetaDataFile().getParentFile() + "\\results.xlsx")) {
 				writeBook.write(outputStream);
 			}
 

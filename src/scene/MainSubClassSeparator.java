@@ -1,23 +1,16 @@
 package scene;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-
-import com.agile.api.APIException;
-
 import application.SubClassSeparator;
-import entities.FormData;
+import entities.SplitData;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -35,20 +28,16 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-public class MainSubClassSeparator extends Application {
+public class MainSubClassSeparator {
 
 	private File metaDataFile;
 
 	FileChooser fileChooser = new FileChooser();
 	DirectoryChooser directoryChooser = new DirectoryChooser();
 
-	@Override
-	public void start(Stage primaryStage) {
+	public StackPane load(Stage primaryStage) {
 		try {
-
 			StackPane root = new StackPane();
-
-			primaryStage.setTitle("Kalypso Agile Rapid Loader Optimizer");
 
 			GridPane grid = new GridPane();
 			grid.setAlignment(Pos.CENTER);
@@ -101,35 +90,25 @@ public class MainSubClassSeparator extends Application {
 						// TODO send error message when it all breaks
 					}
 
+					SplitData formData = new SplitData(metaDataFile, subClassColumn.getText(), "");
+
 					try {
-						FormData formData = new FormData(metaDataFile, subClassColumn.getText());
-
-						try {
-							SubClassSeparator.processData(formData);
-						} catch (APIException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-						displayMessage(AlertType.INFORMATION, "Run succesfully");
-
-					} catch (InvalidFormatException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} catch (IOException e1) {
+						SubClassSeparator.processData(formData);
+					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
+					displayMessage(AlertType.INFORMATION, "Run succesfully");
+
 				}
 			});
 
 			root.getChildren().add(grid);
-			Scene scene = new Scene(root, 800, 700);
-			primaryStage.setScene(scene);
-
-			primaryStage.show();
+			return root;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return null;
 	}
 
 	private static void displayMessage(AlertType severity, String message) {
@@ -142,10 +121,6 @@ public class MainSubClassSeparator extends Application {
 		fileChooser.setTitle("Open Files");
 		fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
 		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("All Files", "*.xlsx", "*.xls"));
-	}
-
-	public static void main(String[] args) {
-		launch(args);
 	}
 
 	public static void hackTooltipStartTiming(Tooltip tooltip) {

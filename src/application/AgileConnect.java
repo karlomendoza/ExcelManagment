@@ -14,8 +14,25 @@ import com.agile.api.IWorkflow;
 
 public class AgileConnect {
 
+	public static void main(String... string) throws APIException {
+		while (true) {
+			try {
+				List<String> changeOrders = getChangeOrders("data.loader", "agile",
+						"http://icuaglapp301.icumed.com:7006/Agile", "Data Migration", 100);
+				for (String string2 : changeOrders) {
+					System.out.println(string2);
+				}
+				break;
+			} catch (Exception ex) {
+				;
+
+			}
+
+		}
+	}
+
 	public static List<String> getChangeOrders(String userId, String password, String url, String workflowName,
-			double changeOrdersToCreate) throws APIException {
+			int changeOrdersToCreate) throws APIException {
 
 		List<String> changeOrderNames = new ArrayList<>();
 		Map<Integer, String> map = new HashMap<Integer, String>();

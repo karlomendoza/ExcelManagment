@@ -44,7 +44,7 @@ public class Utils {
 	 */
 	public static Workbook getWorkBook(File workBookName) throws IOException, InvalidFormatException {
 		if (workBookName == null)
-			return new HSSFWorkbook();
+			return new XSSFWorkbook();
 
 		String extension = FilenameUtils.getExtension(workBookName.getName());
 
@@ -71,12 +71,14 @@ public class Utils {
 			Cell cell = dataRow.getCell((int) c);
 			if (cell != null) {
 				Cell createCell = writeToRow.createCell(c);
+
 				switch (cell.getCellType()) {
 				case Cell.CELL_TYPE_NUMERIC:
 					createCell.setCellValue(cell.getNumericCellValue());
 					break;
 				case Cell.CELL_TYPE_STRING:
 					createCell.setCellValue(cell.getStringCellValue());
+					break;
 				}
 			}
 		}
