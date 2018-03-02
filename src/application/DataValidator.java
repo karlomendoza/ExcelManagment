@@ -152,7 +152,7 @@ public class DataValidator {
 			}
 
 			try (FileOutputStream outputStream = new FileOutputStream(
-					formData.getMetaDataFile().getParentFile() + "\\results.xlsx")) {
+					formData.getMetaDataFile().getParentFile() + "\\errors.xlsx")) {
 				writeBook.write(outputStream);
 			}
 

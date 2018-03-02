@@ -4,7 +4,6 @@ import java.io.File;
 import java.lang.reflect.Field;
 
 import application.SubClassSeparator;
-import entities.SplitData;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
@@ -23,7 +22,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -33,7 +31,6 @@ public class MainSubClassSeparator {
 	private File metaDataFile;
 
 	FileChooser fileChooser = new FileChooser();
-	DirectoryChooser directoryChooser = new DirectoryChooser();
 
 	public StackPane load(Stage primaryStage) {
 		try {
@@ -72,7 +69,7 @@ public class MainSubClassSeparator {
 			});
 
 			Label subClassColumnLabel = new Label("Column name with SubClass");
-			TextField subClassColumn = new TextField("SubClass");
+			TextField subClassColumn = new TextField("Document Type");
 			grid.add(subClassColumnLabel, 0, 2);
 			grid.add(subClassColumn, 1, 2);
 			Tooltip subClassColumnTooltip = new Tooltip("Column that's going to get the transformation applied to");
@@ -90,16 +87,13 @@ public class MainSubClassSeparator {
 						// TODO send error message when it all breaks
 					}
 
-					SplitData formData = new SplitData(metaDataFile, subClassColumn.getText(), "");
-
 					try {
-						SubClassSeparator.processData(formData);
+						SubClassSeparator.processData(metaDataFile, subClassColumn.getText());
+						displayMessage(AlertType.INFORMATION, "Run succesfully");
 					} catch (Exception e1) {
-						// TODO Auto-generated catch block
+						displayMessage(AlertType.INFORMATION, "Run with errors");
 						e1.printStackTrace();
 					}
-					displayMessage(AlertType.INFORMATION, "Run succesfully");
-
 				}
 			});
 

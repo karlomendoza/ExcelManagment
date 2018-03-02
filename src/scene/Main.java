@@ -104,7 +104,7 @@ public class Main {
 			Label splitEach = new Label("Split Metadata file in how many rows:");
 			grid.add(splitEach, 0, 3);
 
-			TextField splitMetaDataEachRows = new TextField("10");
+			TextField splitMetaDataEachRows = new TextField("500");
 			grid.add(splitMetaDataEachRows, 1, 3);
 
 			Tooltip splitMetaDataEachRowsTooltip = new Tooltip(
@@ -171,7 +171,7 @@ public class Main {
 			final ComboBox<String> objecType = new ComboBox<String>(objecTypeOptions);
 
 			Label numberLabel = new Label("Column name with Title Block Number");
-			TextField numberColumn = new TextField();
+			TextField numberColumn = new TextField("Number");
 
 			Tooltip numberColumnTooltip = new Tooltip(
 					"On the metadata file, the name of the column that contains the Title Bock Number value (the id on agile)");

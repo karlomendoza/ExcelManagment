@@ -35,8 +35,8 @@ public class ImportDataProcessor {
 	public static CellStyle cellStyle;
 	public static List<Integer> dates = new ArrayList<>();
 	static {
-		dates.add(3);
-		dates.add(16);
+		dates.add(4);
+		// dates.add(16);
 	}
 
 	@SuppressWarnings("resource")
@@ -148,6 +148,13 @@ public class ImportDataProcessor {
 									File f = new File(
 											formData.getDirectoryWithFile().getAbsolutePath() + "\\" + fullFileName);
 									if ((f.exists() && !f.isDirectory())) {
+
+										if (fullFileName.contains("/PDX/") || fullFileName.contains("\\PDX\\")
+												|| fullFileName.contains("/pdx/") || fullFileName.contains("\\PDX\\")) {
+											System.out.println("This file has been excluded : " + fullFileName);
+											continue;
+										}
+
 										passedFileExistance = true;
 
 										if (formData.getRemoveFromPath() > 0) {
@@ -155,11 +162,6 @@ public class ImportDataProcessor {
 													Paths.get(formData.getResultsDirectoryFile().getAbsolutePath()
 															+ CREATION_PATH_FOR_FILES + fullFileName).getParent());
 										}
-										Files.copy(
-												Paths.get(formData.getDirectoryWithFile().getAbsolutePath() + "\\"
-														+ fullFileName),
-												Paths.get(formData.getResultsDirectoryFile().getAbsolutePath()
-														+ CREATION_PATH_FOR_FILES + fullFileName));
 									}
 								}
 								if (!formData.isValidateAttachments() || passedFileExistance) {
@@ -196,6 +198,8 @@ public class ImportDataProcessor {
 										DataFormatter formatter = new DataFormatter();
 										String REVISION = formatter
 												.formatCellValue(row.getCell((int) revisionColumnNumber));
+
+										fullFileName = fullFileName.replace("\\", "/");
 
 										String FILEPATH = formData.getPathToFileFromFileVault() + "\\" + fullFileName;
 										if (formData.getPathToFileFromFileVault().isEmpty())
@@ -252,26 +256,6 @@ public class ImportDataProcessor {
 						writeBook.write(outputStream);
 						writeBook.close();
 					}
-
-					// Create the change orders this is done after everything so we don't have to
-					// wait multiple times for the agile connections
-					// List<String> changeOrdersNames = new ArrayList<>();
-					// if (formData.isCreateChangeOrders()) {
-					//
-					// changeOrdersNames = AgileConnect.getChangeOrders(formData.getUserId(),
-					// formData.getPassword(),
-					// formData.getUrl(), formData.getWorkflowName(), workBooksCreated);
-					//
-					// // Rename the files to have it's changeOrder prepended in the name
-					// for (int i = 1; i <= changeOrdersNames.size(); i++) {
-					// Files.move(
-					// Paths.get(formData.getResultsDirectoryFile().getAbsolutePath() + i
-					// + formData.getMetaDataFile().getName()),
-					// Paths.get(formData.getResultsDirectoryFile().getAbsolutePath()
-					// + changeOrdersNames.get(i - 1) + "_" + i
-					// + formData.getMetaDataFile().getName()));
-					// }
-					// }
 				} catch (Exception ioe) {
 					ioe.printStackTrace();
 				}

@@ -4,14 +4,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import entities.SplitData;
 import utils.Utils;
 
 public class SubClassSeparator {
@@ -19,17 +21,24 @@ public class SubClassSeparator {
 	public static void main(String... strings) throws InvalidFormatException, IOException {
 
 		File metaDataFile = new File(
-				"C:\\Users\\Karlo Mendoza\\Excel Work\\ICU MEDICAL\\SAP DMS\\T1\\1SAPDMS_transformed_onlyData_part1 - Copy.xlsx");
+				"C:\\Users\\Karlo Mendoza\\Excel Work\\ICU MEDICAL\\SAP DMS\\Demo\\T2_\\MetaData Transformed.xlsx");
 		String columnToSplitFor = "SubClass";
-		String columnToSplitFor2 = "";
 
-		SplitData formData = new SplitData(metaDataFile, columnToSplitFor, columnToSplitFor2);
-		processData(formData);
+		processData(metaDataFile, columnToSplitFor);
 	}
 
-	public static void processData(SplitData formData) throws InvalidFormatException, IOException {
+	public static CellStyle cellStyle;
+	public static List<Integer> dates = new ArrayList<>();
 
-		try (Workbook wb = Utils.getWorkBook(formData.getMetaDataFile())) {
+	static {
+		dates.add(3);
+		dates.add(16);
+	}
+
+	public static void processData(File metaDataFile, String columnToSplitFor)
+			throws InvalidFormatException, IOException {
+
+		try (Workbook wb = Utils.getWorkBook(metaDataFile)) {
 			Sheet readSheet = wb.getSheetAt(0);
 			Row row;
 			Row headerRow;
@@ -54,14 +63,12 @@ public class SubClassSeparator {
 			}
 
 			int subClassColumnNumber = -1;
-			int subClassColumnNumber2 = -1;
 			String lastSubClassprocessed = "";
 			String lastOtherProcessed = "";
 			Workbook writeBook = null;
 			Sheet writeSheet = null;
 			File f = null;
 
-			int i = 1;
 			for (int r = 0; r < rows; r++) {
 				row = readSheet.getRow(r);
 				if (row != null) {
@@ -69,7 +76,7 @@ public class SubClassSeparator {
 					if (r > 0) {
 						String subClass = Utils.returnCellValueAsString(row.getCell((int) subClassColumnNumber));
 						if (subClass.equals(""))
-							subClass = "NoSubClass";
+							subClass = "ManualReview";
 
 						subClass = cleanInput(subClass);
 
@@ -78,31 +85,31 @@ public class SubClassSeparator {
 						String other = "";
 
 						if (!lastSubClassprocessed.equals(subClass) || !lastOtherProcessed.equals(other)) {
-							if (!lastSubClassprocessed.equals(subClass))
-								i = 1;
 							if (!lastSubClassprocessed.equals(""))
 								saveExcel(writeBook, f);
 
 							lastSubClassprocessed = subClass;
 							lastOtherProcessed = other;
-							f = new File(formData.getMetaDataFile().getParentFile() + "\\" + subClass + ".xlsx");
-							// f = new File(formData.getMetaDataFile().getParentFile() + "\\" + subClass + i
-							// + ".xlsx");
-							i++;
+							f = new File(metaDataFile.getParentFile() + "\\SubclassSplits\\" + subClass + ".xlsx");
 							if (f.exists()) {
 								writeBook = Utils.getWorkBook(f);
 								writeSheet = writeBook.getSheet("data");
+
+								cellStyle = writeBook.createCellStyle();
+								cellStyle.setDataFormat((short) 14);
 							} else {
 								writeBook = Utils.getWorkBook(null);
 								writeSheet = writeBook.createSheet("data");
+
+								cellStyle = writeBook.createCellStyle();
+								cellStyle.setDataFormat((short) 14);
 							}
 							Row createRow = writeSheet.createRow((int) 0);
-							Utils.setCellsValuesToRow(createRow, headerRow, cols);
+							setCellsValuesToRow(createRow, headerRow, cols);
 						}
 
 						Row createRow2 = writeSheet.createRow((int) writeSheet.getPhysicalNumberOfRows());
-						// TODO regresar al utils
-						Utils.setCellsValuesToRow(createRow2, row, cols);
+						setCellsValuesToRow(createRow2, row, cols);
 
 					} else if (r == 0) {
 						// get the column number of the subClass
@@ -111,11 +118,8 @@ public class SubClassSeparator {
 							if (cell != null) {
 								String valueString = Utils.returnCellValueAsString(cell);
 								// Set the number of the column
-								if (valueString.equals(formData.getColumnToSplitFor())) {
+								if (valueString.equals(columnToSplitFor)) {
 									subClassColumnNumber = c;
-								}
-								if (valueString.equals(formData.getColumnToSplitFor2())) {
-									subClassColumnNumber2 = c;
 								}
 							}
 						}
@@ -154,6 +158,35 @@ public class SubClassSeparator {
 		input = input.replace(">", " ");
 		input = input.replace("|", " ");
 		return input;
+	}
+
+	/**
+	 * Gets all the cells from dataRow and copys them in writeToRow, basically it
+	 * copies the whole row, but skips the first one to allow to put the subClass
+	 * 
+	 * @param writeToRow
+	 * @param dataRow
+	 * @param colsNumber
+	 *            number of columns to copy
+	 */
+	private static void setCellsValuesToRow(Row writeToRow, Row dataRow, int colsNumber) {
+		for (int c = 0; c < colsNumber; c++) {
+			Cell cell = dataRow.getCell((int) c);
+			if (cell != null) {
+				Cell createCell = writeToRow.createCell(c);
+
+				switch (cell.getCellType()) {
+				case Cell.CELL_TYPE_NUMERIC:
+					createCell.setCellValue(cell.getNumericCellValue());
+					if (dates.contains(c)) {
+						createCell.setCellStyle(cellStyle);
+					}
+					break;
+				case Cell.CELL_TYPE_STRING:
+					createCell.setCellValue(cell.getStringCellValue());
+				}
+			}
+		}
 	}
 
 }
