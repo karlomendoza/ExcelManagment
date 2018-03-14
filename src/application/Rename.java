@@ -13,14 +13,13 @@ public class Rename {
 
 	public static void main(String... strings) throws IOException {
 		// Rename the files to have it's changeOrder prepended in the name
-		File filesToRename = new File("C:\\Users\\Karlo Mendoza\\Excel Work\\ICU MEDICAL\\Master Control\\T0\\Upload");
+		File filesToRename = new File("C:\\Users\\Karlo Mendoza\\Excel Work\\ICU MEDICAL\\Enovia\\T1_\\UPLOAD");
 
 		// Rename the files to have it's changeOrder prepended in the name
 		List<String> ecos = new ArrayList<>();
-		BufferedReader in = new BufferedReader(
-				new FileReader("C:\\Users\\Karlo Mendoza\\Excel Work\\ICU MEDICAL\\Master Control\\T0\\ecos.txt"));
+		BufferedReader in = new BufferedReader(new FileReader("C:\\Users\\Karlo Mendoza\\Excel Work\\ICU MEDICAL\\Enovia\\T1_\\ecos.txt"));
 
-		String prepededText = "T0_";
+		String prepededText = "T1_";
 
 		String line;
 		while ((line = in.readLine()) != null) {
@@ -36,8 +35,7 @@ public class Rename {
 			String name = file.getName();
 			String shortName = name.replaceAll(prepededText, "");
 
-			Files.move(Paths.get(file.getAbsolutePath()),
-					Paths.get(file.getParentFile() + "\\" + prepededText + ecos.get(i) + "_" + shortName));
+			Files.move(Paths.get(file.getAbsolutePath()), Paths.get(file.getParentFile() + "\\" + prepededText + ecos.get(i) + "_" + shortName));
 			i++;
 		}
 	}
