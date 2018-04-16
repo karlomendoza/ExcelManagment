@@ -5,8 +5,7 @@ import java.io.File;
 public class FormData {
 
 	/**
-	 * File that holds all the information, typically an excel file, only supported
-	 * xlsx and xls
+	 * File that holds all the information, typically an excel file, only supported xlsx and xls
 	 */
 	private File metaDataFiles;
 	/**
@@ -28,33 +27,27 @@ public class FormData {
 	 */
 	private String fileNameColumn;
 	/**
-	 * after how many rows shall the meteDafaFile will be splited into another
-	 * document
+	 * after how many rows shall the meteDafaFile will be splited into another document
 	 */
 	private String splitMetaDataEachRows;
 
 	/**
-	 * Type of object in the agile environment Any of the following "CHANGE",
-	 * "DECLARATION", "FILEFOLDER", "ITEM", "MFR", "MFR_PART", "COMMODITY", "PRICE",
-	 * "PSR", "ACTIVITY", "QCR", "RFQ", "RESPONSE", "PROJECT", "SPECIFICATION",
-	 * "SUBSTANCE", "SUPPLIER"
+	 * Type of object in the agile environment Any of the following "CHANGE", "DECLARATION", "FILEFOLDER", "ITEM", "MFR", "MFR_PART", "COMMODITY",
+	 * "PRICE", "PSR", "ACTIVITY", "QCR", "RFQ", "RESPONSE", "PROJECT", "SPECIFICATION", "SUBSTANCE", "SUPPLIER"
 	 */
 	private String objecType;
 
 	/**
-	 * if creating the indexFile Column name in the metaDataFile that has the Title
-	 * block number (id)
+	 * if creating the indexFile Column name in the metaDataFile that has the Title block number (id)
 	 */
 	private String numberColumn;
 	/**
-	 * if creating the indexFile Column name in the metaDataFile that has the Title
-	 * block revision
+	 * if creating the indexFile Column name in the metaDataFile that has the Title block revision
 	 */
 	private String revisionColumn;
 
 	/**
-	 * if creating the indexFile from the file vault what's the path to access the
-	 * files
+	 * if creating the indexFile from the file vault what's the path to access the files
 	 */
 	private String pathToFileFromFileVault;
 
@@ -63,14 +56,12 @@ public class FormData {
 	 */
 	private String importType;
 	/**
-	 * if creating the indexFile Column name in the metaDataFile that has the
-	 * description || when using the transformation separator we use this too
+	 * if creating the indexFile Column name in the metaDataFile that has the description || when using the transformation separator we use this too
 	 */
 	private String descriptionColumn;
 
 	/**
-	 * if creating the indexFile Column name in the metaDataFile that has the
-	 * description
+	 * if creating the indexFile Column name in the metaDataFile that has the description
 	 */
 	private String subClassColumn;
 
@@ -95,8 +86,7 @@ public class FormData {
 	private String url;
 
 	/**
-	 * If creating Change orders, the workflowname that the CO is going to be
-	 * assigned
+	 * If creating Change orders, the workflowname that the CO is going to be assigned
 	 */
 	private String workflowName;
 
@@ -116,10 +106,9 @@ public class FormData {
 	private String whatever;
 
 	/**
-	 * indicates if the tools is run for testing, if so, it will prepend all title
-	 * block numbers with a timestamp it will also just make a copy of the files
-	 * instead of moving them, indexFile will have the appropriated prepend also.
-	 * The idea is that you can make multiple tests with "different" data on agile
+	 * indicates if the tools is run for testing, if so, it will prepend all title block numbers with a timestamp it will also just make a copy of the
+	 * files instead of moving them, indexFile will have the appropriated prepend also. The idea is that you can make multiple tests with "different" data
+	 * on agile
 	 */
 	private boolean forTesting;
 
@@ -129,34 +118,30 @@ public class FormData {
 	private boolean validateAttachments;
 
 	/**
-	 * When forTesting is selected this variable will have the String of characters
-	 * that will be prepended to the excel file name, to the title block number
-	 * columns in the excel into and into the indexFile where the title block number
-	 * so all of them match
+	 * When forTesting is selected this variable will have the String of characters that will be prepended to the excel file name, to the title block
+	 * number columns in the excel into and into the indexFile where the title block number so all of them match
 	 */
 	private String prependString;
 
 	/**
-	 * For when all files are not on the same folder, but are on different paths,
-	 * the fileName variable can be pointed to the path of the file And this is used
-	 * to remove excess stuff from the path on the excel
+	 * For when all files are not on the same folder, but are on different paths, the fileName variable can be pointed to the path of the file And this is
+	 * used to remove excess stuff from the path on the excel
 	 */
 	private int removeFromPath;
 
 	/**
-	 * Variable used on the one on one transformations to split the cell if multiple
-	 * values are set in a single cell.
+	 * Variable used on the one on one transformations to split the cell if multiple values are set in a single cell.
 	 */
 	private String splitter;
 
 	private File transformationFile;
 
-	public FormData(File metaDataFiles, File directoryWithFile, String fileExtensionColumn, String fileNameColumn,
-			String splitMetaDataEachRows, String objecType, String numberColumn, String revisionColumn,
-			String pathToFileFromFileVault, String importType, String descriptionColumn, boolean createIndexFile,
-			String userId, String password, String url, String workflowName, boolean createChangeOrders,
-			boolean forTesting, File resultsDirectoryFile, String subClassColumn, boolean validateAttachments,
-			String prependString, String removeFromPath) {
+	private String workstation;
+
+	public FormData(File metaDataFiles, File directoryWithFile, String fileExtensionColumn, String fileNameColumn, String splitMetaDataEachRows,
+			String objecType, String numberColumn, String revisionColumn, String pathToFileFromFileVault, String importType, String descriptionColumn,
+			boolean createIndexFile, String userId, String password, String url, String workflowName, boolean createChangeOrders, boolean forTesting,
+			File resultsDirectoryFile, String subClassColumn, boolean validateAttachments, String prependString, String removeFromPath, String workstation) {
 		this.metaDataFiles = metaDataFiles;
 		this.directoryWithFile = directoryWithFile;
 		this.fileExtensionColumn = fileExtensionColumn;
@@ -183,6 +168,7 @@ public class FormData {
 			this.removeFromPath = 0;
 		else
 			this.removeFromPath = Integer.valueOf(removeFromPath);
+		this.workstation = workstation;
 	}
 
 	public File getMetaDataFiles() {
@@ -399,5 +385,13 @@ public class FormData {
 
 	public void setTransformationFile(File transformationFile) {
 		this.transformationFile = transformationFile;
+	}
+
+	public String getWorkstation() {
+		return workstation;
+	}
+
+	public void setWorkstation(String workstation) {
+		this.workstation = workstation;
 	}
 }

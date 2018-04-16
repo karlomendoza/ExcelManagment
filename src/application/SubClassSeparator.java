@@ -20,8 +20,7 @@ public class SubClassSeparator {
 
 	public static void main(String... strings) throws InvalidFormatException, IOException {
 
-		File metaDataFile = new File(
-				"C:\\Users\\Karlo Mendoza\\Excel Work\\ICU MEDICAL\\SAP DMS\\Demo\\T2_\\MetaData Transformed.xlsx");
+		File metaDataFile = new File("C:\\Users\\Karlo Mendoza\\Excel Work\\ICU MEDICAL\\SAP DMS\\Demo\\T2_\\MetaData Transformed.xlsx");
 		String columnToSplitFor = "SubClass";
 
 		processData(metaDataFile, columnToSplitFor);
@@ -35,8 +34,7 @@ public class SubClassSeparator {
 		dates.add(16);
 	}
 
-	public static void processData(File metaDataFile, String columnToSplitFor)
-			throws InvalidFormatException, IOException {
+	public static void processData(File metaDataFile, String columnToSplitFor) throws InvalidFormatException, IOException {
 
 		try (Workbook wb = Utils.getWorkBook(metaDataFile)) {
 			Sheet readSheet = wb.getSheetAt(0);
@@ -90,6 +88,12 @@ public class SubClassSeparator {
 
 							lastSubClassprocessed = subClass;
 							lastOtherProcessed = other;
+
+							File folder = new File(metaDataFile.getParentFile() + "\\SubclassSplits\\");
+							if (!folder.exists()) {
+								folder.mkdirs();
+							}
+
 							f = new File(metaDataFile.getParentFile() + "\\SubclassSplits\\" + subClass + ".xlsx");
 							if (f.exists()) {
 								writeBook = Utils.getWorkBook(f);
@@ -141,8 +145,7 @@ public class SubClassSeparator {
 	}
 
 	/**
-	 * Removes invalid characters from string, since we want to use that as a name
-	 * for files in windows
+	 * Removes invalid characters from string, since we want to use that as a name for files in windows
 	 * 
 	 * @param input
 	 * @return
@@ -161,8 +164,8 @@ public class SubClassSeparator {
 	}
 
 	/**
-	 * Gets all the cells from dataRow and copys them in writeToRow, basically it
-	 * copies the whole row, but skips the first one to allow to put the subClass
+	 * Gets all the cells from dataRow and copys them in writeToRow, basically it copies the whole row, but skips the first one to allow to put the
+	 * subClass
 	 * 
 	 * @param writeToRow
 	 * @param dataRow

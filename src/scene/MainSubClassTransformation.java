@@ -3,7 +3,6 @@ package scene;
 import java.io.File;
 import java.lang.reflect.Field;
 
-import application.SubClassTransformation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
@@ -88,8 +87,7 @@ public class MainSubClassTransformation {
 			TextField descriptionColumn = new TextField("Document Description");
 			grid.add(descriptionColumnLabel, 0, 5);
 			grid.add(descriptionColumn, 1, 5);
-			Tooltip descriptionColumnTooltip = new Tooltip(
-					"Column that's going to decide if the row gets added to the results file or not");
+			Tooltip descriptionColumnTooltip = new Tooltip("Column that's going to decide if the row gets added to the results file or not");
 			Tooltip.install(descriptionColumn, descriptionColumnTooltip);
 
 			final Button transformationButton = new Button("Choose Transformations file");
@@ -125,14 +123,14 @@ public class MainSubClassTransformation {
 						// TODO send error message when it all breaks
 					}
 
-					try {
-						SubClassTransformation.processData(metaDataFiles, transformationFile, docNumberColumn.getText(),
-								docTypeColumn.getText(), descriptionColumn.getText(), "\\|");
-						displayMessage(AlertType.INFORMATION, "Run succesfully");
-					} catch (Exception e1) {
-						displayMessage(AlertType.INFORMATION, "Run Failed");
-						e1.printStackTrace();
-					}
+					// try {
+					// SubClassTransformation.processData(metaDataFiles, transformationFile, docNumberColumn.getText(),
+					// docTypeColumn.getText(), descriptionColumn.getText(), "\\|");
+					// displayMessage(AlertType.INFORMATION, "Run succesfully");
+					// } catch (Exception e1) {
+					// displayMessage(AlertType.INFORMATION, "Run Failed");
+					// e1.printStackTrace();
+					// }
 
 				}
 			});

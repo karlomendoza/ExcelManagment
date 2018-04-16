@@ -27,7 +27,7 @@ public class MainTabs extends Application {
 	public void start(Stage primaryStage) {
 		primaryStage.setTitle("Kalypso Agile Rapid Loader Optimizer");
 		Group root = new Group();
-		Scene scene = new Scene(root, 800, 700, Color.WHITE);
+		Scene scene = new Scene(root, 900, 800, Color.WHITE);
 		TabPane tabPane = new TabPane();
 		BorderPane mainPane = new BorderPane();
 

@@ -4,6 +4,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 
 import application.ImportDataProcessor;
+import application.ImportDataProcessorSAPDMS;
 import entities.FormData;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -43,6 +44,10 @@ public class Main {
 
 	DirectoryChooser metaDatasChooser = new DirectoryChooser();
 	DirectoryChooser directoryChooser = new DirectoryChooser();
+
+	private static final String MC = "Master Control";
+	private static final String SAPDMS = "SAP DMS";
+	private static final String ENOVIA = "ENOVIA";
 
 	public StackPane load(Stage primaryStage) {
 		try {
@@ -107,9 +112,8 @@ public class Main {
 			TextField splitMetaDataEachRows = new TextField("500");
 			grid.add(splitMetaDataEachRows, 1, 3);
 
-			Tooltip splitMetaDataEachRowsTooltip = new Tooltip(
-					"After how many matches of actual documents are we splitting "
-							+ "the metadata that will be created, 1,000 recommended for faster import time. 0 for no split");
+			Tooltip splitMetaDataEachRowsTooltip = new Tooltip("After how many matches of actual documents are we splitting "
+					+ "the metadata that will be created, 1,000 recommended for faster import time. 0 for no split");
 			Tooltip.install(splitMetaDataEachRows, splitMetaDataEachRowsTooltip);
 
 			CheckBox validateAttachments = new CheckBox("Validate attachments exists?");
@@ -142,17 +146,15 @@ public class Main {
 
 			TextField fileNameColumn = new TextField("info_card_id");
 
-			Tooltip fileNameColumnTooltip = new Tooltip(
-					"On the metadata file, the name of the column that contains the names of the attachments.");
+			Tooltip fileNameColumnTooltip = new Tooltip("On the metadata file, the name of the column that contains the names of the attachments.");
 			Tooltip.install(fileNameColumn, fileNameColumnTooltip);
 
 			Label pw = new Label("Column name with attachment Extensions:");
 
 			TextField fileExtensionColumn = new TextField("File Extension");
 
-			Tooltip fileExtensionColumnTooltip = new Tooltip(
-					"On the metadata file, the name of the column that contains the extension"
-							+ " type of the attachments, empty if the attachments name already contains the extension.");
+			Tooltip fileExtensionColumnTooltip = new Tooltip("On the metadata file, the name of the column that contains the extension"
+					+ " type of the attachments, empty if the attachments name already contains the extension.");
 			Tooltip.install(fileExtensionColumn, fileExtensionColumnTooltip);
 
 			Label removeFromPathLabel = new Label("Remove how many \\ from Path:");
@@ -165,9 +167,8 @@ public class Main {
 			// Add elements for indexFileCreation
 
 			Label objecTypeLabel = new Label("Type of object");
-			ObservableList<String> objecTypeOptions = FXCollections.observableArrayList("CHANGE", "DECLARATION",
-					"FILEFOLDER", "ITEM", "MFR", "MFR_PART", "COMMODITY", "PRICE", "PSR", "ACTIVITY", "QCR", "RFQ",
-					"RESPONSE", "PROJECT", "SPECIFICATION", "SUBSTANCE", "SUPPLIER");
+			ObservableList<String> objecTypeOptions = FXCollections.observableArrayList("CHANGE", "DECLARATION", "FILEFOLDER", "ITEM", "MFR", "MFR_PART",
+					"COMMODITY", "PRICE", "PSR", "ACTIVITY", "QCR", "RFQ", "RESPONSE", "PROJECT", "SPECIFICATION", "SUBSTANCE", "SUPPLIER");
 			final ComboBox<String> objecType = new ComboBox<String>(objecTypeOptions);
 
 			Label numberLabel = new Label("Column name with Title Block Number");
@@ -198,8 +199,7 @@ public class Main {
 			Label descriptionLabel = new Label("Column name with Description");
 			TextField descriptionColumn = new TextField();
 
-			Tooltip descriptionColumnTooltip = new Tooltip(
-					"On the metadata file, the name of the column that contains the Description of the document value.");
+			Tooltip descriptionColumnTooltip = new Tooltip("On the metadata file, the name of the column that contains the Description of the document value.");
 			Tooltip.install(descriptionColumn, descriptionColumnTooltip);
 
 			CheckBox forTesting = new CheckBox("For Testing");
@@ -209,15 +209,13 @@ public class Main {
 
 			Label prependStringLabel = new Label("Prepend this for testing:");
 			TextField prependString = new TextField();
-			Tooltip prependStringTooltip = new Tooltip(
-					"This will be prepended to the excel files names and title block number column and in the index file");
+			Tooltip prependStringTooltip = new Tooltip("This will be prepended to the excel files names and title block number column and in the index file");
 			Tooltip.install(prependString, prependStringTooltip);
 
 			CheckBox createIndexFile = new CheckBox("Create Index File?");
 			createIndexFile.setSelected(false);
 
-			Tooltip createIndexFileToolTip = new Tooltip(
-					"Selecting this option will create the index file used for attaching the documents to agile");
+			Tooltip createIndexFileToolTip = new Tooltip("Selecting this option will create the index file used for attaching the documents to agile");
 			Tooltip.install(createIndexFile, createIndexFileToolTip);
 
 			hackTooltipStartTiming(t);
@@ -330,6 +328,19 @@ public class Main {
 				}
 			});
 
+			Label dataStreamLabel = new Label("Data Source");
+			ObservableList<String> dataStreamOptions = FXCollections.observableArrayList(MC, SAPDMS, ENOVIA);
+			final ComboBox<String> dataStream = new ComboBox<String>(dataStreamOptions);
+			grid.add(dataStreamLabel, 0, 18);
+			grid.add(dataStream, 1, 18);
+
+			Label workstationNameLabel = new Label("Workstation Application Column name");
+			TextField workstation = new TextField("Workstation Application");
+			Tooltip workstationTooltip = new Tooltip("Column for SAP DMS where you can tell the type of the file PDX, WRD, LOG, DCR");
+			Tooltip.install(workstation, workstationTooltip);
+			grid.add(workstationNameLabel, 0, 19);
+			grid.add(workstation, 1, 19);
+
 			// HERE STARTS THE SECOND COLUMN
 
 			Label agileUserNameLabel = new Label("User name");
@@ -382,8 +393,7 @@ public class Main {
 				@Override
 				public void handle(final ActionEvent e) {
 					if (forTesting.isSelected() && numberColumn.getText().equals("")) {
-						displayMessage(AlertType.ERROR,
-								"When \"For testing\" option is selected you need to select a \"Column name with Title Block Number\"");
+						displayMessage(AlertType.ERROR, "When \"For testing\" option is selected you need to select a \"Column name with Title Block Number\"");
 						return;
 					}
 
@@ -394,22 +404,32 @@ public class Main {
 					grid.setDisable(true);
 					root.getChildren().add(box);
 
-					FormData formData = new FormData(metaDataFile, directoryWithFile, fileExtensionColumn.getText(),
-							fileNameColumn.getText(), splitMetaDataEachRows.getText(), objecType.getValue(),
-							numberColumn.getText(), revisionColumn.getText(), pathToFileFromFileVault.getText(),
-							importType.getValue(), descriptionColumn.getText(), createIndexFile.isSelected(),
-							agileUserName.getText(), agilePassword.getText(), agileUrl.getText(),
-							agileWorkFlowName.getText(), createChangeOrders.isSelected(), forTesting.isSelected(),
-							resultsDirectoryFile, null, validateAttachments.isSelected(), prependString.getText(),
-							removeFromPath.getText());
+					FormData formData = new FormData(metaDataFile, directoryWithFile, fileExtensionColumn.getText(), fileNameColumn.getText(),
+							splitMetaDataEachRows.getText(), objecType.getValue(), numberColumn.getText(), revisionColumn.getText(),
+							pathToFileFromFileVault.getText(), importType.getValue(), descriptionColumn.getText(), createIndexFile.isSelected(),
+							agileUserName.getText(), agilePassword.getText(), agileUrl.getText(), agileWorkFlowName.getText(), createChangeOrders.isSelected(),
+							forTesting.isSelected(), resultsDirectoryFile, null, validateAttachments.isSelected(), prependString.getText(),
+							removeFromPath.getText(), workstation.getText());
 
-					try {
-						ImportDataProcessor.processData(formData);
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+					if (dataStream.getValue().equals(SAPDMS)) {
+						try {
+							ImportDataProcessorSAPDMS.processData(formData);
+							displayMessage(AlertType.INFORMATION, "Run succesfully");
+						} catch (Exception e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+							displayMessage(AlertType.INFORMATION, "Run failed");
+						}
+					} else {
+						try {
+							ImportDataProcessor.processData(formData);
+							displayMessage(AlertType.INFORMATION, "Run succesfully");
+						} catch (Exception e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+							displayMessage(AlertType.INFORMATION, "Run failed");
+						}
 					}
-					displayMessage(AlertType.INFORMATION, "Run succesfully");
 
 					grid.setDisable(false);
 					root.getChildren().remove(box);

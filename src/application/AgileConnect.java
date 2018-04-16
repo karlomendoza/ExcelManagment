@@ -17,13 +17,15 @@ public class AgileConnect {
 	public static void main(String... string) throws APIException {
 		while (true) {
 			try {
-				List<String> changeOrders = getChangeOrders("data.loader", "agile", "http://icuaglapp301.icumed.com:7006/Agile", "Data Migration", 69);
+				List<String> changeOrders = getChangeOrders("data.loader", "agile", "https://icuaglapp201.icumed.com:7023/Agile", "Data Migration", 130);
+				// List<String> changeOrders = getChangeOrders("data.loader", "agile", "http://icuaglapp301.icumed.com:7006/Agile", "Data Migration", 130);
+
 				for (String string2 : changeOrders) {
 					System.out.println(string2);
 				}
 				break;
 			} catch (Exception ex) {
-				;
+				ex.printStackTrace();
 
 			}
 

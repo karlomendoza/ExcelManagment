@@ -23,7 +23,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import entities.FormData;
 import utils.Utils;
 
-public class ImportDataProcessor {
+public class ImportDataProcessorSAPDMS {
 
 	private static final String CREATION_PATH_FOR_FILES = "\\attachments\\";
 	private static final String INDEX_FILE_NAME = "indexFile.txt";
@@ -31,6 +31,11 @@ public class ImportDataProcessor {
 
 	private static int numberColumnNumber = -1;
 	private static String prependTestingText = "";
+	private static final String PDF = "PDF";
+	private static final String PDX = "PDX";
+	private static final String WORD = "WRD";
+	private static final String LOG = "LOG";
+	private static final String DCR = "DCR";
 
 	public static CellStyle cellStyle;
 	public static List<Integer> dates = new ArrayList<>();
@@ -39,7 +44,6 @@ public class ImportDataProcessor {
 		dates.add(13);
 		dates.add(6);
 
-		// dates.add(16);
 	}
 
 	@SuppressWarnings("resource")
@@ -115,7 +119,10 @@ public class ImportDataProcessor {
 					numberColumnNumber = -1;
 					int revisionColumnNumber = -1;
 					int descriptionColumnNumber = -1;
+					int workstationApplicationColumnNumber = -1;
 
+					String previousDocumentNumber = "";
+					boolean containsPDForPDX = false;
 					// int rowsCreated = 0;
 					for (int r = 0; r < rows; r++) {
 						row = readSheet.getRow(r);
@@ -125,6 +132,8 @@ public class ImportDataProcessor {
 
 								Boolean passedFileExistance = false;
 								String fullFileName = "";
+
+								// TODO We need to remove file existance validation, and just trust that it actually exists
 								if (formData.isValidateAttachments()) {
 
 									String fileName = Utils.returnCellValueAsString(row.getCell((int) fileNameColumnNumber));
@@ -135,38 +144,60 @@ public class ImportDataProcessor {
 
 									fullFileName = formatFileName(fileName, fileType);
 
-									try {
-										if (formData.getRemoveFromPath() > 0) {
-											StringJoiner sj = new StringJoiner("\\");
-											String[] split = fullFileName.split("\\\\");
-											for (int i = formData.getRemoveFromPath(); i < split.length; i++) {
-												sj.add(split[i]);
-											}
-											fullFileName = sj.toString();
+									if (formData.getRemoveFromPath() > 0) {
+										StringJoiner sj = new StringJoiner("\\");
+										String[] split = fullFileName.split("\\\\");
+										for (int i = formData.getRemoveFromPath(); i < split.length; i++) {
+											sj.add(split[i]);
 										}
-									} catch (Exception ex) {
-										// For when the file_path is empty
-										System.out.println("file path is empty");
+										fullFileName = sj.toString();
 									}
-									passedFileExistance = true;
 
-									// File f = new File(formData.getDirectoryWithFile().getAbsolutePath() + "\\" + fullFileName);
-									// if ((f.exists() && !f.isDirectory())) {
-									//
-									// passedFileExistance = true;
-									//
-									// if (formData.getRemoveFromPath() > 0) {
-									// Files.createDirectories(
-									// Paths.get(formData.getResultsDirectoryFile().getAbsolutePath() + CREATION_PATH_FOR_FILES + fullFileName)
-									// .getParent());
-									// }
-									// }
+									File f = new File(formData.getDirectoryWithFile().getAbsolutePath() + "\\" + fullFileName);
+									if ((f.exists() && !f.isDirectory())) {
+
+										passedFileExistance = true;
+
+										if (formData.getRemoveFromPath() > 0) {
+											Files.createDirectories(
+													Paths.get(formData.getResultsDirectoryFile().getAbsolutePath() + CREATION_PATH_FOR_FILES + fullFileName)
+															.getParent());
+										}
+									}
 								}
 								if (!formData.isValidateAttachments() || passedFileExistance) {
 
 									if (writeSheet.getPhysicalNumberOfRows() == 0) {
 										setCellsValuesToRow(writeSheet.createRow((int) 0), headerRow, cols);
 									}
+
+									// TODO WE need to scan the whole block check if a different document number has appeared
+									String documentNumber = Utils.returnCellValueAsString(row.getCell((int) numberColumnNumber));
+									if (documentNumber.equals(previousDocumentNumber)) {
+										// its already processed, no need to do anything
+									} else {
+										// TODO we need to process this
+
+										containsPDForPDX = false;
+
+										String WORKSTATION_APPLICATION = Utils.returnCellValueAsString(row.getCell((int) workstationApplicationColumnNumber));
+
+										if (WORKSTATION_APPLICATION.equals(PDF) || WORKSTATION_APPLICATION.equals(PDX))
+											containsPDForPDX = true;
+
+										int currentRow = r;
+										while (true) {
+											currentRow++;
+											row = readSheet.getRow(currentRow);
+
+											Utils.returnCellValueAsString(row.getCell((int) numberColumnNumber));
+											break;
+										}
+
+										previousDocumentNumber = documentNumber;
+									}
+
+									row = readSheet.getRow(r);
 
 									Row createRow = writeSheet.createRow((int) writeSheet.getPhysicalNumberOfRows());
 									setCellsValuesToRow(createRow, row, cols);
@@ -190,13 +221,10 @@ public class ImportDataProcessor {
 									}
 									if (formData.isCreateIndexFile()) {
 
-										// If there is no file to attach, continue with the next one
-										if (fullFileName == null || fullFileName.isEmpty() || fullFileName.equals("")) {
+										// FOR LOG and DCR documents we are not importing those, dont add them to the indexFile, continue with the next file
+										String WORKSTATION_APPLICATION = Utils.returnCellValueAsString(row.getCell((int) workstationApplicationColumnNumber));
+										if (WORKSTATION_APPLICATION.equals(LOG) || WORKSTATION_APPLICATION.equals(DCR))
 											continue;
-										}
-										if (!fullFileName.contains(".")) {
-											continue;
-										}
 
 										String TITLEBLOCK_NUMBER = prependTestingText + Utils.returnCellValueAsString(row.getCell((int) numberColumnNumber));
 
@@ -234,6 +262,9 @@ public class ImportDataProcessor {
 											revisionColumnNumber = c;
 										if (valueString.equals(formData.getDescriptionColumn()))
 											descriptionColumnNumber = c;
+										if (valueString.equals(formData.getWorkstation()))
+											workstationApplicationColumnNumber = c;
+
 										if (formData.isCreateIndexFile()) {
 											if (valueString.equals(formData.getRevisionColumn()))
 												revisionColumnNumber = c;
