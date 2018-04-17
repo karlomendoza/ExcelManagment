@@ -142,7 +142,9 @@ public class ImportDataProcessor {
 											for (int i = formData.getRemoveFromPath(); i < split.length; i++) {
 												sj.add(split[i]);
 											}
-											fullFileName = sj.toString();
+											// To fix issues for master control where the data as two different type of folder structureixon
+											if (!split[0].equals(fullFileName))
+												fullFileName = sj.toString();
 										}
 									} catch (Exception ex) {
 										// For when the file_path is empty
@@ -205,16 +207,25 @@ public class ImportDataProcessor {
 
 										fullFileName = fullFileName.replace("\\", "/");
 
-										String FILEPATH = formData.getPathToFileFromFileVault() + "\\" + fullFileName;
+										String FILEPATH = formData.getPathToFileFromFileVault() + "/" + fullFileName;
 										if (formData.getPathToFileFromFileVault().isEmpty())
 											FILEPATH = fullFileName;
 										else
-											FILEPATH = formData.getPathToFileFromFileVault() + "\\" + fullFileName;
+											FILEPATH = formData.getPathToFileFromFileVault() + "/" + fullFileName;
 
 										String IMPORT_TYPE = formData.getImportType();
 										String DESCRIPTION = Utils.returnCellValueAsString(row.getCell((int) descriptionColumnNumber));
+
+										if (DESCRIPTION.contains("\n"))
+											DESCRIPTION = DESCRIPTION.replaceAll("\n", " ");
+										if (DESCRIPTION.contains("\r"))
+											DESCRIPTION = DESCRIPTION.replaceAll("\r", "");
+
 										indexFile.write(formData.getObjecType() + "|" + TITLEBLOCK_NUMBER + "|" + REVISION + "|" + FILEPATH + "|" + IMPORT_TYPE
 												+ "|" + DESCRIPTION + BREAK_LINE);
+
+										if (r % 1000 == 0)
+											indexFile.flush();
 									}
 								}
 							} else if (r == 0) {
