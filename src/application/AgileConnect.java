@@ -15,6 +15,7 @@ import com.agile.api.IWorkflow;
 public class AgileConnect {
 
 	public static void main(String... string) throws APIException {
+		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 		while (true) {
 			try {
 				List<String> changeOrders = getChangeOrders("data.loader", "agile", "https://icuaglapp201.icumed.com:7023/Agile", "Data Migration", 130);

@@ -33,7 +33,19 @@ public class ImportDataProcessor {
 	private static String prependTestingText = "";
 
 	public static CellStyle cellStyle;
+	public static boolean validateFileExistance = false;
 	public static List<Integer> dates = new ArrayList<>();
+
+	private static final String PDF = "PDF";
+	private static final String PDX = "PDX";
+	private static final String WORD = "WRD";
+	private static final String TXT = "TXT";
+	private static final String LOG = "LOG";
+	private static final String DCR = "DCR";
+	private static final String MC = "Master Control";
+	private static final String SAPDMS = "SAP DMS";
+	private static final String ENOVIA = "ENOVIA";
+
 	static {
 		dates.add(23);
 		dates.add(13);
@@ -115,6 +127,10 @@ public class ImportDataProcessor {
 					numberColumnNumber = -1;
 					int revisionColumnNumber = -1;
 					int descriptionColumnNumber = -1;
+					int workstationApplicationColumnNumber = -1;
+
+					String previousDocumentNumber = "";
+					boolean containsPDForPDX = false;
 
 					// int rowsCreated = 0;
 					for (int r = 0; r < rows; r++) {
@@ -150,19 +166,20 @@ public class ImportDataProcessor {
 										// For when the file_path is empty
 										System.out.println("file path is empty");
 									}
-									passedFileExistance = true;
 
-									// File f = new File(formData.getDirectoryWithFile().getAbsolutePath() + "\\" + fullFileName);
-									// if ((f.exists() && !f.isDirectory())) {
-									//
-									// passedFileExistance = true;
-									//
-									// if (formData.getRemoveFromPath() > 0) {
-									// Files.createDirectories(
-									// Paths.get(formData.getResultsDirectoryFile().getAbsolutePath() + CREATION_PATH_FOR_FILES + fullFileName)
-									// .getParent());
-									// }
-									// }
+									if (!validateFileExistance) {
+										passedFileExistance = true;
+									} else {
+										File f = new File(formData.getDirectoryWithFile().getAbsolutePath() + "\\" + fullFileName);
+										if ((f.exists() && !f.isDirectory())) {
+											passedFileExistance = true;
+											if (formData.getRemoveFromPath() > 0) {
+												Files.createDirectories(
+														Paths.get(formData.getResultsDirectoryFile().getAbsolutePath() + CREATION_PATH_FOR_FILES + fullFileName)
+																.getParent());
+											}
+										}
+									}
 								}
 								if (!formData.isValidateAttachments() || passedFileExistance) {
 
@@ -170,7 +187,88 @@ public class ImportDataProcessor {
 										setCellsValuesToRow(writeSheet.createRow((int) 0), headerRow, cols);
 									}
 
-									Row createRow = writeSheet.createRow((int) writeSheet.getPhysicalNumberOfRows());
+									Row createRow = null;
+
+									if (formData.getDataStream().equals(SAPDMS) && formData.isNativeFiles()) {
+										// TODO WE need to scan the whole block check if a different document number has appeared
+										String documentNumber = Utils.returnCellValueAsString(row.getCell((int) numberColumnNumber));
+										if (documentNumber.equals(previousDocumentNumber)) {
+											// its already processed, no need to do anything
+											// TODO we actually need to update the fields in here, if it contains pdx or pdf it's already calculated
+
+											createRow = writeSheet.createRow((int) writeSheet.getPhysicalNumberOfRows());
+
+											Cell createCell1 = createRow.createCell(cols + 1);
+											Cell createCell2 = createRow.createCell(cols + 2);
+											Cell createCell3 = createRow.createCell(cols + 3);
+
+											String WORKSTATION_APPLICATION = Utils
+													.returnCellValueAsString(row.getCell((int) workstationApplicationColumnNumber));
+
+											String file_name = Utils.returnCellValueAsString(row.getCell((int) fileNameColumnNumber));
+
+											String[] split = file_name.split("\\\\");
+											String fileName = split[split.length - 1];
+											String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length());
+											createCell1.setCellValue(fileExtension);
+											createCell3.setCellValue(fileName);
+
+											if (WORKSTATION_APPLICATION.equals(PDF) || WORKSTATION_APPLICATION.equals(PDX)) {
+												createCell2.setCellValue("YES");
+											} else if (containsPDForPDX) {
+												createCell2.setCellValue("NO");
+											} else if (!containsPDForPDX && (WORKSTATION_APPLICATION.equals(WORD) || WORKSTATION_APPLICATION.equals(TXT))) {
+												createCell2.setCellValue("YES");
+											} else if (WORKSTATION_APPLICATION.equals(LOG) || WORKSTATION_APPLICATION.equals(DCR)) {
+												createCell2.setCellValue("NO");
+											} else {
+												createCell2.setCellValue("CHECK");
+											}
+
+										} else {
+											// TODO we need to check if the block of files contains a PDX or PDF in here, if it does put the flag true, go back
+											// 1 in the r and continue like normal
+											// if it does not contain it, make it false, go back 1 in the r and continue like normal
+											previousDocumentNumber = documentNumber;
+
+											containsPDForPDX = false;
+
+											String WORKSTATION_APPLICATION = Utils
+													.returnCellValueAsString(row.getCell((int) workstationApplicationColumnNumber));
+
+											if (WORKSTATION_APPLICATION.equals(PDF) || WORKSTATION_APPLICATION.equals(PDX)) {
+												containsPDForPDX = true;
+												r--;
+												continue;
+											}
+
+											int currentRow = r;
+											while (true) {
+												currentRow++;
+												row = readSheet.getRow(currentRow);
+
+												if (!documentNumber.equals(Utils.returnCellValueAsString(row.getCell((int) numberColumnNumber)))) {
+													break;
+												}
+
+												if (Utils.returnCellValueAsString(row.getCell((int) workstationApplicationColumnNumber)).equals(PDF)
+														|| Utils.returnCellValueAsString(row.getCell((int) workstationApplicationColumnNumber)).equals(PDX)) {
+													containsPDForPDX = true;
+													break;
+												}
+											}
+
+											r--;
+											continue;
+										}
+
+										// row = readSheet.getRow(r);
+
+										// TODO ends of the block to check if a record in the excel is
+									} else {
+										createRow = writeSheet.createRow((int) writeSheet.getPhysicalNumberOfRows());
+									}
+
 									setCellsValuesToRow(createRow, row, cols);
 
 									if (splitEachNRows != 0 && writeSheet.getPhysicalNumberOfRows() > splitEachNRows) {
@@ -191,6 +289,11 @@ public class ImportDataProcessor {
 										workBooksCreated++;
 									}
 									if (formData.isCreateIndexFile()) {
+
+										// FOR LOG and DCR documents we are not importing those, dont add them to the indexFile, continue with the next file
+										String WORKSTATION_APPLICATION = Utils.returnCellValueAsString(row.getCell((int) workstationApplicationColumnNumber));
+										if (WORKSTATION_APPLICATION.equals(LOG) || WORKSTATION_APPLICATION.equals(DCR))
+											continue;
 
 										// If there is no file to attach, continue with the next one
 										if (fullFileName == null || fullFileName.isEmpty() || fullFileName.equals("")) {
@@ -245,11 +348,14 @@ public class ImportDataProcessor {
 											revisionColumnNumber = c;
 										if (valueString.equals(formData.getDescriptionColumn()))
 											descriptionColumnNumber = c;
+										if (valueString.equals(formData.getWorkstation()))
+											workstationApplicationColumnNumber = c;
 										if (formData.isCreateIndexFile()) {
 											if (valueString.equals(formData.getRevisionColumn()))
 												revisionColumnNumber = c;
 											if (valueString.equals(formData.getDescriptionColumn()))
 												descriptionColumnNumber = c;
+
 										}
 									}
 								}

@@ -138,10 +138,15 @@ public class FormData {
 
 	private String workstation;
 
+	private String dataStream;
+
+	private boolean nativeFiles;
+
 	public FormData(File metaDataFiles, File directoryWithFile, String fileExtensionColumn, String fileNameColumn, String splitMetaDataEachRows,
 			String objecType, String numberColumn, String revisionColumn, String pathToFileFromFileVault, String importType, String descriptionColumn,
 			boolean createIndexFile, String userId, String password, String url, String workflowName, boolean createChangeOrders, boolean forTesting,
-			File resultsDirectoryFile, String subClassColumn, boolean validateAttachments, String prependString, String removeFromPath, String workstation) {
+			File resultsDirectoryFile, String subClassColumn, boolean validateAttachments, String prependString, String removeFromPath, String workstation,
+			String dataStream, boolean nativeFiles) {
 		this.metaDataFiles = metaDataFiles;
 		this.directoryWithFile = directoryWithFile;
 		this.fileExtensionColumn = fileExtensionColumn;
@@ -169,6 +174,8 @@ public class FormData {
 		else
 			this.removeFromPath = Integer.valueOf(removeFromPath);
 		this.workstation = workstation;
+		this.dataStream = dataStream;
+		this.nativeFiles = nativeFiles;
 	}
 
 	public File getMetaDataFiles() {
@@ -393,5 +400,21 @@ public class FormData {
 
 	public void setWorkstation(String workstation) {
 		this.workstation = workstation;
+	}
+
+	public String getDataStream() {
+		return dataStream;
+	}
+
+	public void setDataStream(String dataStream) {
+		this.dataStream = dataStream;
+	}
+
+	public boolean isNativeFiles() {
+		return nativeFiles;
+	}
+
+	public void setNativeFiles(boolean nativeFiles) {
+		this.nativeFiles = nativeFiles;
 	}
 }

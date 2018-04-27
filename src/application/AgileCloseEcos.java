@@ -25,13 +25,15 @@ import utils.Utils;
 
 public class AgileCloseEcos {
 
-	private static final String METADATA_PATH = "C:\\Users\\Karlo Mendoza\\Excel Work\\ICU MEDICAL\\Master Control\\T0\\Upload_done\\";
+	private static final String METADATA_PATH = "C:\\Users\\Karlo Mendoza\\Excel Work\\ICU MEDICAL\\Master Control\\T2\\Upload\\done\\";
 
 	public static void main(String... string) throws APIException {
 		IAgileSession session;
 		while (true) {
 			try {
-				session = connectToAgile("data.loader", "agile", "http://icuaglapp301.icumed.com:7006/Agile");
+				// session = connectToAgile("data.loader", "agile", "http://icuaglapp301.icumed.com:7006/Agile");
+				// https://icuaglapp201.icumed.com:7023/Agile
+				session = connectToAgile("data.loader", "agile", "https://icuaglapp201.icumed.com:7023/Agile");
 				break;
 			} catch (Exception ex) {
 			}
@@ -60,19 +62,15 @@ public class AgileCloseEcos {
 
 	public static void releaseEco(ParsedFile parsedFile, IAgileSession session) throws APIException {
 		try {
-			IChange changeOrder = (IChange) session.getObject(session.getAdminInstance().getAgileClass("ECO"),
-					parsedFile.eco);
+			IChange changeOrder = (IChange) session.getObject(session.getAdminInstance().getAgileClass("ECO"), parsedFile.eco);
 
 			ITable affectedItems = changeOrder.getTable(ChangeConstants.TABLE_AFFECTEDITEMS);
 
-			if (parsedFile.numberOfRows != -1 && affectedItems.size() != parsedFile.numberOfRows
-					&& affectedItems.size() <= 0) {
-				System.out.println("ECO: " + parsedFile.eco + " has zero records, thats bad, file name: "
-						+ parsedFile.fullNameWithoutExtension);
+			if (parsedFile.numberOfRows != -1 && affectedItems.size() != parsedFile.numberOfRows && affectedItems.size() <= 0) {
+				System.out.println("ECO: " + parsedFile.eco + " has zero records, thats bad, file name: " + parsedFile.fullNameWithoutExtension);
 				return;
 			}
-			System.out.println("ECO: " + parsedFile.eco + " has " + affectedItems.size() + " records, file name: "
-					+ parsedFile.fullNameWithoutExtension);
+			System.out.println("ECO: " + parsedFile.eco + " has " + affectedItems.size() + " records, file name: " + parsedFile.fullNameWithoutExtension);
 
 			Map<String, String> values = new HashMap<String, String>();
 			values.put("descriptionOfChange", parsedFile.fullNameWithoutExtension);
@@ -117,8 +115,8 @@ public class AgileCloseEcos {
 		String numberWithNoise = nameWithNoise.substring(nameWithNoise.length() - 8, nameWithNoise.length() - 5);
 		String number = "";
 		for (char elem : numberWithNoise.toCharArray()) {
-			if (elem == '0' || elem == '1' || elem == '2' || elem == '3' || elem == '4' || elem == '5' || elem == '6'
-					|| elem == '7' || elem == '8' || elem == '9') {
+			if (elem == '0' || elem == '1' || elem == '2' || elem == '3' || elem == '4' || elem == '5' || elem == '6' || elem == '7' || elem == '8'
+					|| elem == '9') {
 				number += elem;
 			}
 		}
@@ -145,8 +143,7 @@ public class AgileCloseEcos {
 		public String fullNameWithoutExtension;
 		public int numberOfRows;
 
-		ParsedFile(String eco, String nameWithoutExtension, String fileNumber, String fullNameWithoutExtension,
-				int numberOfRows) {
+		ParsedFile(String eco, String nameWithoutExtension, String fileNumber, String fullNameWithoutExtension, int numberOfRows) {
 			this.eco = eco;
 			this.nameWithoutExtension = nameWithoutExtension;
 			this.fileNumber = fileNumber;

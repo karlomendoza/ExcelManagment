@@ -4,7 +4,6 @@ import java.io.File;
 import java.lang.reflect.Field;
 
 import application.ImportDataProcessor;
-import application.ImportDataProcessorSAPDMS;
 import entities.FormData;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -312,8 +311,8 @@ public class Main {
 				@Override
 				public void handle(final ActionEvent e) {
 					if (forTesting.isSelected() && !createIndexFile.isSelected()) {
-						grid.add(numberLabel, 0, 10);
-						grid.add(numberColumn, 1, 10);
+						grid.add(numberLabel, 0, 11);
+						grid.add(numberColumn, 1, 11);
 					} else if (!forTesting.isSelected() && !createIndexFile.isSelected()) {
 						grid.getChildren().remove(numberLabel);
 						grid.getChildren().remove(numberColumn);
@@ -340,6 +339,27 @@ public class Main {
 			Tooltip.install(workstation, workstationTooltip);
 			grid.add(workstationNameLabel, 0, 19);
 			grid.add(workstation, 1, 19);
+
+			CheckBox nativeFiles = new CheckBox("SAP DMS Native Files 3 fields creator");
+			nativeFiles.setSelected(false);
+			grid.add(nativeFiles, 0, 20);
+			Tooltip nativeFilesTooltip = new Tooltip(
+					"Click here when you want to create the Native files Fields for SAP DMS, this can only be done if you select SAP DMS Data source, the validate attachments exists option and fill the column name with attachments names or file path and the Column name with attachment extensions if they have this field");
+			Tooltip.install(nativeFiles, nativeFilesTooltip);
+
+			nativeFiles.setOnAction(new EventHandler<ActionEvent>() {
+				@Override
+				public void handle(final ActionEvent e) {
+					if (nativeFiles.isSelected()) {
+						grid.add(numberLabel, 0, 11);
+						grid.add(numberColumn, 1, 11);
+					} else {
+						grid.getChildren().remove(numberLabel);
+						grid.getChildren().remove(numberColumn);
+
+					}
+				}
+			});
 
 			// HERE STARTS THE SECOND COLUMN
 
@@ -409,26 +429,15 @@ public class Main {
 							pathToFileFromFileVault.getText(), importType.getValue(), descriptionColumn.getText(), createIndexFile.isSelected(),
 							agileUserName.getText(), agilePassword.getText(), agileUrl.getText(), agileWorkFlowName.getText(), createChangeOrders.isSelected(),
 							forTesting.isSelected(), resultsDirectoryFile, null, validateAttachments.isSelected(), prependString.getText(),
-							removeFromPath.getText(), workstation.getText());
+							removeFromPath.getText(), workstation.getText(), dataStream.getValue(), nativeFiles.isSelected());
 
-					if (dataStream.getValue().equals(SAPDMS)) {
-						try {
-							ImportDataProcessorSAPDMS.processData(formData);
-							displayMessage(AlertType.INFORMATION, "Run succesfully");
-						} catch (Exception e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-							displayMessage(AlertType.INFORMATION, "Run failed");
-						}
-					} else {
-						try {
-							ImportDataProcessor.processData(formData);
-							displayMessage(AlertType.INFORMATION, "Run succesfully");
-						} catch (Exception e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-							displayMessage(AlertType.INFORMATION, "Run failed");
-						}
+					try {
+						ImportDataProcessor.processData(formData);
+						displayMessage(AlertType.INFORMATION, "Run succesfully");
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+						displayMessage(AlertType.INFORMATION, "Run failed");
 					}
 
 					grid.setDisable(false);
