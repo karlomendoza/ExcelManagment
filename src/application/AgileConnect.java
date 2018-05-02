@@ -18,7 +18,7 @@ public class AgileConnect {
 		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 		while (true) {
 			try {
-				List<String> changeOrders = getChangeOrders("data.loader", "agile", "https://icuaglapp201.icumed.com:7023/Agile", "Data Migration", 130);
+				List<String> changeOrders = getChangeOrders("data.loader", "agile", "https://agileplmtst.icumed.com/Agile ", "Data Migration", 2);
 				// List<String> changeOrders = getChangeOrders("data.loader", "agile", "http://icuaglapp301.icumed.com:7006/Agile", "Data Migration", 130);
 
 				for (String string2 : changeOrders) {

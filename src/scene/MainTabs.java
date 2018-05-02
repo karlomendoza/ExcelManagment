@@ -50,12 +50,12 @@ public class MainTabs extends Application {
 		tabB.setContent(mainSubClassSeparator);
 		tabPane.getTabs().add(tabB);
 
-		// Tab tabC = new Tab();
-		// tabC.setText("Validation Tool");
-		// MainSubClassValidation mainV = new MainSubClassValidation();
-		// StackPane mainSubClassValidation = mainV.load(primaryStage);
-		// tabC.setContent(mainSubClassValidation);
-		// tabPane.getTabs().add(tabC);
+		Tab tabC = new Tab();
+		tabC.setText("Validation Tool");
+		MainSubClassValidation mainV = new MainSubClassValidation();
+		StackPane mainSubClassValidation = mainV.load(primaryStage);
+		tabC.setContent(mainSubClassValidation);
+		tabPane.getTabs().add(tabC);
 
 		Tab tabD = new Tab();
 		tabD.setText("Batch tool");

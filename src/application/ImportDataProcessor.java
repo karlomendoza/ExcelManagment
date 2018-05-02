@@ -47,10 +47,8 @@ public class ImportDataProcessor {
 	private static final String ENOVIA = "ENOVIA";
 
 	static {
-		dates.add(23);
-		dates.add(13);
-		dates.add(6);
-
+		dates.add(14);
+		dates.add(7);
 		// dates.add(16);
 	}
 
@@ -130,7 +128,6 @@ public class ImportDataProcessor {
 					int workstationApplicationColumnNumber = -1;
 
 					String previousDocumentNumber = "";
-					boolean containsPDForPDX = false;
 
 					// int rowsCreated = 0;
 					for (int r = 0; r < rows; r++) {
@@ -138,6 +135,10 @@ public class ImportDataProcessor {
 						if (row != null) {
 							// if it's not the header
 							if (r > 0) {
+
+								String stopItNow = Utils.returnCellValueAsString(row.getCell((int) numberColumnNumber));
+								if (stopItNow == null || stopItNow.equals(""))
+									break;
 
 								Boolean passedFileExistance = false;
 								String fullFileName = "";
@@ -155,9 +156,17 @@ public class ImportDataProcessor {
 										if (formData.getRemoveFromPath() > 0) {
 											StringJoiner sj = new StringJoiner("\\");
 											String[] split = fullFileName.split("\\\\");
-											for (int i = formData.getRemoveFromPath(); i < split.length; i++) {
-												sj.add(split[i]);
+
+											if (fullFileName.startsWith("X:")) {
+												for (int i = formData.getRemoveFromPath() - 1; i < split.length; i++) {
+													sj.add(split[i]);
+												}
+											} else {
+												for (int i = formData.getRemoveFromPath(); i < split.length; i++) {
+													sj.add(split[i]);
+												}
 											}
+
 											// To fix issues for master control where the data as two different type of folder structureixon
 											if (!split[0].equals(fullFileName))
 												fullFileName = sj.toString();
@@ -188,6 +197,8 @@ public class ImportDataProcessor {
 									}
 
 									Row createRow = null;
+									int numberOfNative = 0;
+									int numberOfPdx = 0;
 
 									if (formData.getDataStream().equals(SAPDMS) && formData.isNativeFiles()) {
 										// TODO WE need to scan the whole block check if a different document number has appeared
@@ -213,14 +224,14 @@ public class ImportDataProcessor {
 											createCell1.setCellValue(fileExtension);
 											createCell3.setCellValue(fileName);
 
-											if (WORKSTATION_APPLICATION.equals(PDF) || WORKSTATION_APPLICATION.equals(PDX)) {
-												createCell2.setCellValue("YES");
-											} else if (containsPDForPDX) {
-												createCell2.setCellValue("NO");
-											} else if (!containsPDForPDX && (WORKSTATION_APPLICATION.equals(WORD) || WORKSTATION_APPLICATION.equals(TXT))) {
+											if (WORKSTATION_APPLICATION.equals(PDX)) {
 												createCell2.setCellValue("YES");
 											} else if (WORKSTATION_APPLICATION.equals(LOG) || WORKSTATION_APPLICATION.equals(DCR)) {
 												createCell2.setCellValue("NO");
+											} else if (numberOfPdx == numberOfNative) {
+												createCell2.setCellValue("YES");
+											} else if (numberOfPdx == 0) {
+												createCell2.setCellValue("YES");
 											} else {
 												createCell2.setCellValue("CHECK");
 											}
@@ -231,15 +242,13 @@ public class ImportDataProcessor {
 											// if it does not contain it, make it false, go back 1 in the r and continue like normal
 											previousDocumentNumber = documentNumber;
 
-											containsPDForPDX = false;
-
 											String WORKSTATION_APPLICATION = Utils
 													.returnCellValueAsString(row.getCell((int) workstationApplicationColumnNumber));
 
-											if (WORKSTATION_APPLICATION.equals(PDF) || WORKSTATION_APPLICATION.equals(PDX)) {
-												containsPDForPDX = true;
-												r--;
-												continue;
+											if (WORKSTATION_APPLICATION.equals(PDX)) {
+												numberOfPdx++;
+											} else if (!WORKSTATION_APPLICATION.equals(LOG) && !WORKSTATION_APPLICATION.equals(DCR)) {
+												numberOfNative++;
 											}
 
 											int currentRow = r;
@@ -247,22 +256,27 @@ public class ImportDataProcessor {
 												currentRow++;
 												row = readSheet.getRow(currentRow);
 
-												if (!documentNumber.equals(Utils.returnCellValueAsString(row.getCell((int) numberColumnNumber)))) {
-													break;
+												try {
+													if (!documentNumber.equals(Utils.returnCellValueAsString(row.getCell((int) numberColumnNumber)))) {
+														break;
+													}
+												} catch (Exception ex) {
+													ex.printStackTrace();
 												}
 
-												if (Utils.returnCellValueAsString(row.getCell((int) workstationApplicationColumnNumber)).equals(PDF)
-														|| Utils.returnCellValueAsString(row.getCell((int) workstationApplicationColumnNumber)).equals(PDX)) {
-													containsPDForPDX = true;
-													break;
+												String WORKSTATION_APPLICATION_child = Utils
+														.returnCellValueAsString(row.getCell((int) workstationApplicationColumnNumber));
+
+												if (WORKSTATION_APPLICATION_child.equals(PDX)) {
+													numberOfPdx++;
+												} else if (!WORKSTATION_APPLICATION_child.equals(LOG) && !WORKSTATION_APPLICATION.equals(DCR)) {
+													numberOfNative++;
 												}
 											}
 
 											r--;
 											continue;
 										}
-
-										// row = readSheet.getRow(r);
 
 										// TODO ends of the block to check if a record in the excel is
 									} else {
@@ -373,6 +387,8 @@ public class ImportDataProcessor {
 
 						writeBook.write(outputStream);
 						writeBook.close();
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 				} catch (Exception ioe) {
 					ioe.printStackTrace();
