@@ -129,6 +129,9 @@ public class ImportDataProcessor {
 
 					String previousDocumentNumber = "";
 
+					int numberOfNative = 0;
+					int numberOfPdx = 0;
+
 					// int rowsCreated = 0;
 					for (int r = 0; r < rows; r++) {
 						row = readSheet.getRow(r);
@@ -197,8 +200,6 @@ public class ImportDataProcessor {
 									}
 
 									Row createRow = null;
-									int numberOfNative = 0;
-									int numberOfPdx = 0;
 
 									if (formData.getDataStream().equals(SAPDMS) && formData.isNativeFiles()) {
 										// TODO WE need to scan the whole block check if a different document number has appeared
@@ -237,6 +238,8 @@ public class ImportDataProcessor {
 											}
 
 										} else {
+											numberOfNative = 0;
+											numberOfPdx = 0;
 											// TODO we need to check if the block of files contains a PDX or PDF in here, if it does put the flag true, go back
 											// 1 in the r and continue like normal
 											// if it does not contain it, make it false, go back 1 in the r and continue like normal
@@ -257,7 +260,8 @@ public class ImportDataProcessor {
 												row = readSheet.getRow(currentRow);
 
 												try {
-													if (!documentNumber.equals(Utils.returnCellValueAsString(row.getCell((int) numberColumnNumber)))) {
+													if (documentNumber == null || row == null
+															|| !documentNumber.equals(Utils.returnCellValueAsString(row.getCell((int) numberColumnNumber)))) {
 														break;
 													}
 												} catch (Exception ex) {
@@ -269,7 +273,7 @@ public class ImportDataProcessor {
 
 												if (WORKSTATION_APPLICATION_child.equals(PDX)) {
 													numberOfPdx++;
-												} else if (!WORKSTATION_APPLICATION_child.equals(LOG) && !WORKSTATION_APPLICATION.equals(DCR)) {
+												} else if (!WORKSTATION_APPLICATION_child.equals(LOG) && !WORKSTATION_APPLICATION_child.equals(DCR)) {
 													numberOfNative++;
 												}
 											}

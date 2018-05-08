@@ -20,7 +20,8 @@ import org.xml.sax.SAXException;
 
 public class ParseErrorLogs {
 
-	public static final File files = new File("C:\\Users\\Karlo Mendoza\\Excel Work\\ICU MEDICAL\\Master Control\\T3\\logs\\");
+	public static final File files = new File(
+			"C:\\Users\\Karlo Mendoza\\Box Sync\\Clients\\ICU Medical\\ICU Medical PLM Implementation\\Workstreams\\Program Data Migration\\Data Files\\SAP-DMS\\Training\\logs\\errors\\");
 
 	public static void main(String... strings) throws ParserConfigurationException, IOException, SAXException {
 		parse();
