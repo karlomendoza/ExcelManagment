@@ -30,8 +30,9 @@ public class SubClassSeparator {
 	public static List<Integer> dates = new ArrayList<>();
 
 	static {
-		dates.add(7);
-		dates.add(14);
+		dates.add(6);
+		dates.add(13);
+		dates.add(23);
 	}
 
 	public static void processData(File metaDataFile, String columnToSplitFor) throws InvalidFormatException, IOException {

@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -47,9 +48,9 @@ public class ImportDataProcessor {
 	private static final String ENOVIA = "ENOVIA";
 
 	static {
-		dates.add(14);
-		dates.add(7);
-		// dates.add(16);
+		dates.add(6);
+		dates.add(13);
+		dates.add(23);
 	}
 
 	@SuppressWarnings("resource")
@@ -63,10 +64,7 @@ public class ImportDataProcessor {
 		}
 
 		if (formData.isForTesting()) {
-			if (formData.getPrependString().isEmpty())
-				prependTestingText = String.valueOf(System.currentTimeMillis()) + "_";
-			else
-				prependTestingText = formData.getPrependString();
+			prependTestingText = formData.getPrependString();
 		}
 
 		try (BufferedWriter indexFile = new BufferedWriter(new FileWriter(formData.getResultsDirectoryFile().getAbsolutePath() + "\\" + INDEX_FILE_NAME))) {
@@ -131,6 +129,9 @@ public class ImportDataProcessor {
 
 					int numberOfNative = 0;
 					int numberOfPdx = 0;
+					int numberOfSendToPDH = 0;
+					boolean requiresManual = false;
+					boolean alreadyPrintedMessage = false;
 
 					// int rowsCreated = 0;
 					for (int r = 0; r < rows; r++) {
@@ -139,9 +140,11 @@ public class ImportDataProcessor {
 							// if it's not the header
 							if (r > 0) {
 
-								String stopItNow = Utils.returnCellValueAsString(row.getCell((int) numberColumnNumber));
-								if (stopItNow == null || stopItNow.equals(""))
-									break;
+								if (numberColumnNumber != -1) {
+									String stopItNow = Utils.returnCellValueAsString(row.getCell((int) numberColumnNumber));
+									if (stopItNow == null || stopItNow.equals(""))
+										break;
+								}
 
 								Boolean passedFileExistance = false;
 								String fullFileName = "";
@@ -155,14 +158,23 @@ public class ImportDataProcessor {
 
 									fullFileName = formatFileName(fileName, fileType);
 
+									// TODO validate this
 									try {
 										if (formData.getRemoveFromPath() > 0) {
 											StringJoiner sj = new StringJoiner("\\");
 											String[] split = fullFileName.split("\\\\");
 
-											if (fullFileName.startsWith("X:")) {
+											if (formData.getDataStream().equals(SAPDMS) && fullFileName.startsWith("X:")) {
 												for (int i = formData.getRemoveFromPath() - 1; i < split.length; i++) {
 													sj.add(split[i]);
+												}
+											} else if (formData.getDataStream().equals(MC)) {
+												if (fullFileName.contains("\\\\")) {
+													for (int i = formData.getRemoveFromPath(); i < split.length; i++) {
+														sj.add(split[i]);
+													}
+												} else {
+													sj.add(fullFileName);
 												}
 											} else {
 												for (int i = formData.getRemoveFromPath(); i < split.length; i++) {
@@ -227,22 +239,44 @@ public class ImportDataProcessor {
 
 											if (WORKSTATION_APPLICATION.equals(PDX)) {
 												createCell2.setCellValue("YES");
+												numberOfSendToPDH++;
 											} else if (WORKSTATION_APPLICATION.equals(LOG) || WORKSTATION_APPLICATION.equals(DCR)) {
 												createCell2.setCellValue("NO");
 											} else if (numberOfPdx == numberOfNative) {
-												createCell2.setCellValue("YES");
+												createCell2.setCellValue("NO");
 											} else if (numberOfPdx == 0) {
 												createCell2.setCellValue("YES");
+												numberOfSendToPDH++;
 											} else {
 												createCell2.setCellValue("CHECK");
+												requiresManual = true;
+											}
+
+											List<String> documentTypesToCheck = Arrays.asList("Non-Quality System Document",
+													"Production Method - APLS - Automation Process Limit Sheet",
+													"Production Method - Manufacturing Work Instructions",
+													"Production Method - MPLS - Mold Process Limit Sheet", "Production Method - Process Specification - Drug",
+													"Production Method - Process Specification - Rubber",
+													"Production Method - Process Specification - Sterilization",
+													"Production Method - Process Specification - Technical",
+													"Production Method - Production Line Setup Instructions",
+													"Production Method - Sterilization Instr/Loading Patterns", "Quality System Procedure", "Sampling Plan",
+													"Servicing", "Servicing - Product");
+											String documentType = Utils.returnCellValueAsString(row.getCell((int) 0));
+
+											if (!alreadyPrintedMessage && (numberOfSendToPDH > 1 || requiresManual)
+													&& documentTypesToCheck.contains(documentType)) {
+												Cell createCell4 = createRow.createCell(cols + 4);
+												createCell4.setCellValue("Document With Data Migration Impact Assessment");
+												alreadyPrintedMessage = true;
 											}
 
 										} else {
 											numberOfNative = 0;
 											numberOfPdx = 0;
-											// TODO we need to check if the block of files contains a PDX or PDF in here, if it does put the flag true, go back
-											// 1 in the r and continue like normal
-											// if it does not contain it, make it false, go back 1 in the r and continue like normal
+											numberOfSendToPDH = 0;
+											requiresManual = false;
+											alreadyPrintedMessage = false;
 											previousDocumentNumber = documentNumber;
 
 											String WORKSTATION_APPLICATION = Utils
@@ -307,6 +341,9 @@ public class ImportDataProcessor {
 										workBooksCreated++;
 									}
 									if (formData.isCreateIndexFile()) {
+										if (workstationApplicationColumnNumber == -1) {
+											workstationApplicationColumnNumber = 1;
+										}
 
 										// FOR LOG and DCR documents we are not importing those, dont add them to the indexFile, continue with the next file
 										String WORKSTATION_APPLICATION = Utils.returnCellValueAsString(row.getCell((int) workstationApplicationColumnNumber));
@@ -315,9 +352,6 @@ public class ImportDataProcessor {
 
 										// If there is no file to attach, continue with the next one
 										if (fullFileName == null || fullFileName.isEmpty() || fullFileName.equals("")) {
-											continue;
-										}
-										if (!fullFileName.contains(".")) {
 											continue;
 										}
 
