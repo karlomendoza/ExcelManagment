@@ -143,14 +143,14 @@ public class Main {
 
 			Label fileName = new Label("Column with attachments names or path:");
 
-			TextField fileNameColumn = new TextField("info_card_id");
+			TextField fileNameColumn = new TextField("file_name");
 
 			Tooltip fileNameColumnTooltip = new Tooltip("On the metadata file, the name of the column that contains the names of the attachments.");
 			Tooltip.install(fileNameColumn, fileNameColumnTooltip);
 
 			Label pw = new Label("Column name with attachment Extensions:");
 
-			TextField fileExtensionColumn = new TextField("File Extension");
+			TextField fileExtensionColumn = new TextField("");
 
 			Tooltip fileExtensionColumnTooltip = new Tooltip("On the metadata file, the name of the column that contains the extension"
 					+ " type of the attachments, empty if the attachments name already contains the extension.");
@@ -169,6 +169,7 @@ public class Main {
 			ObservableList<String> objecTypeOptions = FXCollections.observableArrayList("CHANGE", "DECLARATION", "FILEFOLDER", "ITEM", "MFR", "MFR_PART",
 					"COMMODITY", "PRICE", "PSR", "ACTIVITY", "QCR", "RFQ", "RESPONSE", "PROJECT", "SPECIFICATION", "SUBSTANCE", "SUPPLIER");
 			final ComboBox<String> objecType = new ComboBox<String>(objecTypeOptions);
+			objecType.setValue("ITEM");
 
 			Label numberLabel = new Label("Column name with Title Block Number");
 			TextField numberColumn = new TextField("Number");
@@ -178,7 +179,7 @@ public class Main {
 			Tooltip.install(numberColumn, numberColumnTooltip);
 
 			Label revisionLabel = new Label("Column name with Title Block Revision");
-			TextField revisionColumn = new TextField();
+			TextField revisionColumn = new TextField("Rev");
 
 			Tooltip revisionColumnTooltip = new Tooltip(
 					"On the metadata file, the name of the column that contains the Title Bock Revision value (the revision on agile)");
@@ -194,6 +195,7 @@ public class Main {
 			Label importTypeLabel = new Label("Import Type");
 			ObservableList<String> importTypeOptions = FXCollections.observableArrayList("FILE", "INPLACE");
 			final ComboBox<String> importType = new ComboBox<String>(importTypeOptions);
+			importType.setValue("INPLACE");
 
 			Label descriptionLabel = new Label("Column name with Description");
 			TextField descriptionColumn = new TextField();

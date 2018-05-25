@@ -13,13 +13,15 @@ public class Rename {
 
 	public static void main(String... strings) throws IOException {
 		// Rename the files to have it's changeOrder prepended in the name
-		File filesToRename = new File("C:\\Users\\Karlo Mendoza\\Excel Work\\ICU MEDICAL\\SAP DMS\\Round2\\Upload");
+		File filesToRename = new File(
+				"C:\\Users\\Karlo Mendoza\\Box Sync\\Clients\\ICU Medical\\ICU Medical PLM Implementation\\Workstreams\\Program Data Migration\\Data Files\\MasterControl\\Final Migration\\Extract\\upload");
 
-		String prepededText = "T3_";
+		String prepededText = "";
 
 		// Rename the files to have it's changeOrder prepended in the name
 		List<String> ecos = new ArrayList<>();
-		BufferedReader in = new BufferedReader(new FileReader("C:\\Users\\Karlo Mendoza\\Excel Work\\ICU MEDICAL\\SAP DMS\\Round2\\eco.txt"));
+		BufferedReader in = new BufferedReader(new FileReader(
+				"C:\\Users\\Karlo Mendoza\\Box Sync\\Clients\\ICU Medical\\ICU Medical PLM Implementation\\Workstreams\\Program Data Migration\\Data Files\\MasterControl\\Final Migration\\Extract\\ecos.txt"));
 
 		String line;
 		while ((line = in.readLine()) != null) {
