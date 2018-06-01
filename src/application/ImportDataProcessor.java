@@ -371,13 +371,20 @@ public class ImportDataProcessor {
 										String IMPORT_TYPE = formData.getImportType();
 										String DESCRIPTION = Utils.returnCellValueAsString(row.getCell((int) descriptionColumnNumber));
 
+										String pdhMessage = "|File Integration to PDH=\"Do Not Send to PDH\"";
+
+										Boolean toPdhOrNot = row.getCell((int) 5).getBooleanCellValue();
+										if (toPdhOrNot) {
+											pdhMessage = "";
+										}
+
 										if (DESCRIPTION.contains("\n"))
 											DESCRIPTION = DESCRIPTION.replaceAll("\n", " ");
 										if (DESCRIPTION.contains("\r"))
 											DESCRIPTION = DESCRIPTION.replaceAll("\r", "");
 
 										indexFile.write(formData.getObjecType() + "|" + TITLEBLOCK_NUMBER + "|" + REVISION + "|" + FILEPATH + "|" + IMPORT_TYPE
-												+ "|" + DESCRIPTION + BREAK_LINE);
+												+ "|" + DESCRIPTION + pdhMessage + BREAK_LINE);
 
 										if (r % 1000 == 0)
 											indexFile.flush();
